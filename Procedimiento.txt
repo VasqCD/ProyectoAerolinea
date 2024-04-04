@@ -1,0 +1,124 @@
+Script Laravel
+
+#Procedimientos de Proyecto de clase de Base de Datos II 
+#Requisitos: 
+# MySQL, PHP8 >, Composer
+
+composer create-project laravel/laravel appClase
+cd appClase
+
+#Creación de base de datos en Mysql
+DB_DATABASE=Aerolinea
+DB_USERNAME=root 
+DB_PASSWORD=admin1234
+
+#Cambio de valor de las variables del ambiente .env 
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=Aerolinea
+DB_USERNAME=root 
+DB_PASSWORD=admin1234
+
+
+#Ejecutar el make migration 
+php artisan make:migration aerolineas
+php artisan make:migration fabricants
+php artisan make:migration aeronavs
+
+#En la carpeta de database, dentro de migrations, aparecerá la migración realizada.
+#Dentro colocar la estructrura de un esquema en cada migración según el caso
+
+ public function up()
+    {
+        Schema::create('aerolineas', function (Blueprint $table) {
+            $table->engine="InnoDB";
+            $table->bigIncrements('id');
+            $table->string('nombreAerolinea', 100);  
+            $table->boolean('estatus');         
+            $table->timestamps();
+        });
+    }
+
+
+    public function up() 
+    {
+        Schema::create('fabricants', function (Blueprint $table) {
+            $table->engine="InnoDB";
+            $table->bigIncrements('id');
+            $table->string('nombreFabricante', 100);    
+            $table->boolean('estatus');       
+            $table->timestamps();
+
+        });
+    }
+
+
+    public function up()
+    {
+        Schema::create('aeronavs', function (Blueprint $table) {
+            $table->engine="InnoDB";
+            $table->bigIncrements('id');
+            $table->bigInteger('idAerolinea')->unsigned();
+            $table->bigInteger('idFabricante')->unsigned();
+            $table->string('nombreAeronave', 100);      
+            $table->string('serie', 100)->nullable();   
+            $table->boolean('estatus');    
+            $table->timestamps();
+
+            $table->foreign('idAerolinea')->references('id')->on('aerolineas')->onDelete("restrict");
+            $table->foreign('idFabricante')->references('id')->on('fabricants')->onDelete("restrict");
+        });
+    }
+
+
+#Ejecutar la acción de Migración de la base de datos
+php artisan migrate
+
+#A continuación requerimos la ui de laravel. 
+composer require laravel/ui 
+
+#A continuación, importar bootstrap para laravel 
+php artisan ui bootstrap --auth 
+
+#Ejecutar ambos procesos 
+npm install
+
+
+#Instalamos el CRUD de las migraciones 
+composer require ibex/crud-generator --dev
+
+#Agregamos la etiqueta para manejar el CRUD 
+php artisan vendor:publish --tag=crud
+
+
+php artisan make:crud aerolineas 
+php artisan make:crud fabricants 
+php artisan make:crud aeronavs    
+
+
+#Modificar los modelos para retirar los cambios no requeridos
+
+
+#Se deben agregar las tres respectivas rutas 
+Route::resource('aerolineas', App\Http\Controllers\AerolineaController::class);
+Route::resource('fabricants', App\Http\Controllers\FabricantController::class);
+Route::resource('aeronavs', App\Http\Controllers\AeronavController::class);
+
+#Modificación del archivo Blade de App en Views
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('aerolineas.index') }}">Aerolineas</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('fabricants.index') }}">Fabricantes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="{{ route('aeronavs.index') }}">Aeronaves</a>
+                        </li>
+
+
+#Ejecutamos el Server y el Run Dev 
+
+php artisan serve
+
+npm run dev
